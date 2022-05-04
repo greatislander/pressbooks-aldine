@@ -155,20 +155,20 @@
         },
         {
             "name": "pressbooks/mix",
-            "version": "2.1",
+            "version": "2.1.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/pressbooks/mix.git",
-                "reference": "4cb5d44244468480c24f30ea08070b37711ba864"
+                "reference": "25aaa7691cf78917ff2b037260596cdcf7a8c8c7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/pressbooks/mix/zipball/4cb5d44244468480c24f30ea08070b37711ba864",
-                "reference": "4cb5d44244468480c24f30ea08070b37711ba864",
+                "url": "https://api.github.com/repos/pressbooks/mix/zipball/25aaa7691cf78917ff2b037260596cdcf7a8c8c7",
+                "reference": "25aaa7691cf78917ff2b037260596cdcf7a8c8c7",
                 "shasum": ""
             },
             "require-dev": {
-                "humanmade/coding-standards": "^0.2.1"
+                "pressbooks/coding-standards": "^1.1"
             },
             "type": "library",
             "autoload": {
@@ -186,19 +186,19 @@
                     "email": "code@pressbooks.com"
                 }
             ],
-            "time": "2017-09-06T21:35:04+00:00"
+            "time": "2022-05-03T18:58:59+00:00"
         },
         {
             "name": "soberwp/intervention",
             "version": "1.2.0-p",
             "source": {
                 "type": "git",
-                "url": "https://github.com/soberwp/intervention.git",
+                "url": "https://github.com/darrenjacoby/intervention.git",
                 "reference": "1698e51efe696c5867fb78ef7c5d2efff9b79260"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/soberwp/intervention/zipball/1698e51efe696c5867fb78ef7c5d2efff9b79260",
+                "url": "https://api.github.com/repos/darrenjacoby/intervention/zipball/1698e51efe696c5867fb78ef7c5d2efff9b79260",
                 "reference": "1698e51efe696c5867fb78ef7c5d2efff9b79260",
                 "shasum": ""
             },
@@ -211,13 +211,13 @@
             },
             "type": "package",
             "autoload": {
+                "files": [
+                    "intervention.php"
+                ],
                 "psr-4": {
                     "Sober\\Intervention\\": "src/",
                     "Sober\\Intervention\\Module\\": "src/modules/"
-                },
-                "files": [
-                    "intervention.php"
-                ]
+                }
             },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
@@ -577,12 +577,12 @@
             },
             "type": "library",
             "autoload": {
-                "psr-4": {
-                    "DeepCopy\\": "src/DeepCopy/"
-                },
                 "files": [
                     "src/DeepCopy/deep_copy.php"
-                ]
+                ],
+                "psr-4": {
+                    "DeepCopy\\": "src/DeepCopy/"
+                }
             },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
@@ -2366,12 +2366,12 @@
                 }
             },
             "autoload": {
-                "psr-4": {
-                    "Symfony\\Polyfill\\Ctype\\": ""
-                },
                 "files": [
                     "bootstrap.php"
-                ]
+                ],
+                "psr-4": {
+                    "Symfony\\Polyfill\\Ctype\\": ""
+                }
             },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
@@ -2442,12 +2442,12 @@
                 }
             },
             "autoload": {
-                "psr-4": {
-                    "Symfony\\Polyfill\\Intl\\Grapheme\\": ""
-                },
                 "files": [
                     "bootstrap.php"
-                ]
+                ],
+                "psr-4": {
+                    "Symfony\\Polyfill\\Intl\\Grapheme\\": ""
+                }
             },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
@@ -2520,12 +2520,12 @@
                 }
             },
             "autoload": {
-                "psr-4": {
-                    "Symfony\\Polyfill\\Intl\\Normalizer\\": ""
-                },
                 "files": [
                     "bootstrap.php"
                 ],
+                "psr-4": {
+                    "Symfony\\Polyfill\\Intl\\Normalizer\\": ""
+                },
                 "classmap": [
                     "Resources/stubs"
                 ]
@@ -2601,12 +2601,12 @@
                 }
             },
             "autoload": {
-                "psr-4": {
-                    "Symfony\\Polyfill\\Mbstring\\": ""
-                },
                 "files": [
                     "bootstrap.php"
-                ]
+                ],
+                "psr-4": {
+                    "Symfony\\Polyfill\\Mbstring\\": ""
+                }
             },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
@@ -2675,12 +2675,12 @@
                 }
             },
             "autoload": {
-                "psr-4": {
-                    "Symfony\\Polyfill\\Php73\\": ""
-                },
                 "files": [
                     "bootstrap.php"
                 ],
+                "psr-4": {
+                    "Symfony\\Polyfill\\Php73\\": ""
+                },
                 "classmap": [
                     "Resources/stubs"
                 ]
@@ -2751,12 +2751,12 @@
                 }
             },
             "autoload": {
-                "psr-4": {
-                    "Symfony\\Polyfill\\Php80\\": ""
-                },
                 "files": [
                     "bootstrap.php"
                 ],
+                "psr-4": {
+                    "Symfony\\Polyfill\\Php80\\": ""
+                },
                 "classmap": [
                     "Resources/stubs"
                 ]
@@ -2909,12 +2909,12 @@
             },
             "type": "library",
             "autoload": {
-                "psr-4": {
-                    "Symfony\\Component\\String\\": ""
-                },
                 "files": [
                     "Resources/functions.php"
                 ],
+                "psr-4": {
+                    "Symfony\\Component\\String\\": ""
+                },
                 "exclude-from-classmap": [
                     "/Tests/"
                 ]
