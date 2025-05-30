@@ -66,7 +66,7 @@ function get_featured_books(): array {
 	foreach ( range( 1, MAX_FEATURED_BOOKS ) as $book ) {
 		$book = get_option( 'pb_front_page_catalog_book_' . $book );
 		if ( $book ) {
-			$featured_books[] = $book;
+			$featured_books[] = (string) $book;
 		}
 	}
 
@@ -503,7 +503,7 @@ function handle_contact_form_submission() {
 					stripslashes( $institution ),
 					wp_strip_all_tags( $message )
 				),
-				"From: ${email}\r\nReply-To: ${email}\r\n"
+				"From: {$email}\r\nReply-To: {$email}\r\n"
 			);
 			if ( $sent ) {
 				$output['message'] = __( 'Your message was sent!', 'pressbooks-aldine' );

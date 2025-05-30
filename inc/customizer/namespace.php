@@ -7,10 +7,53 @@
 
 namespace Aldine\Customizer;
 
-use function Aldine\Helpers\get_catalog_options;
 use PressbooksMix\Assets;
 
 const MAX_FEATURED_BOOKS = 4;
+
+/**
+ * Ajax handler to search catalog books.
+ */
+function ajax_search_catalog_books(): void {
+	if ( ! current_user_can( 'manage_options' ) || ! isset( $_GET['q'] ) ) {
+		wp_send_json_error();
+	}
+	$query = sanitize_text_field( wp_unslash( $_GET['q'] ) );
+	$dc = \Pressbooks\DataCollector\Book::init();
+	$args = [
+		'number'     => 20,
+		'meta_query' => [
+			'relation' => 'AND',
+			[
+				'key'     => $dc::TITLE,
+				'value'   => $query,
+				'compare' => 'LIKE', //phpcs:ignore HM.Performance.SlowMetaQuery.nonperformant_comparison
+			],
+			[
+				'key'     => $dc::IN_CATALOG,
+				'value'   => 1,
+				'compare' => '=', //phpcs:ignore HM.Performance.SlowMetaQuery.nonperformant_comparison
+			],
+		],
+		'orderby'    => 'meta_value', // phpcs:ignore HM.Performance.SlowOrderBy.slow_order
+		'meta_key'   => $dc::TITLE,
+		'order'      => 'ASC',
+		'public'     => 1,
+		'archived'   => 0,
+		'spam'       => 0,
+		'deleted'    => 0,
+		'network_id' => \get_current_network_id(),
+	];
+	$sites = get_sites( $args );
+	$results = [];
+	foreach ( $sites as $site ) {
+		$results[] = [
+			'id'   => $site->blog_id,
+			'text' => $dc->get( $site->blog_id, $dc::TITLE ),
+		];
+	}
+	wp_send_json_success( $results );
+}
 
 /**
  * Add postMessage support for site title and description for the Theme Customizer.
@@ -68,6 +111,12 @@ function customize_register( \WP_Customize_Manager $wp_customize ) {
 	}
 
 	foreach ( [
+		[
+			'slug' => 'header_bg',
+			'hex' => '#fff',
+			'label' => __( 'Header Background', 'pressbooks-aldine' ),
+			'description' => __( 'Header background color.', 'pressbooks-aldine' ),
+		],
 		[
 			'slug' => 'primary',
 			'hex' => '#b01109',
@@ -131,6 +180,45 @@ function customize_register( \WP_Customize_Manager $wp_customize ) {
 		]
 	);
 	$wp_customize->add_setting(
+		'pb_network_linkedin', [
+			'type' => 'option',
+			'sanitize_callback' => 'esc_url_raw',
+		]
+	);
+	$wp_customize->add_control(
+		'pb_network_linkedin', [
+			'label' => __( 'LinkedIn', 'pressbooks-aldine' ),
+			'section'  => 'pb_network_social',
+			'settings' => 'pb_network_linkedin',
+		]
+	);
+	$wp_customize->add_setting(
+		'pb_network_youtube', [
+			'type' => 'option',
+			'sanitize_callback' => 'esc_url_raw',
+		]
+	);
+	$wp_customize->add_control(
+		'pb_network_youtube', [
+			'label' => __( 'YouTube', 'pressbooks-aldine' ),
+			'section'  => 'pb_network_social',
+			'settings' => 'pb_network_youtube',
+		]
+	);
+	$wp_customize->add_setting(
+		'pb_network_bluesky', [
+			'type' => 'option',
+			'sanitize_callback' => 'esc_url_raw',
+		]
+	);
+	$wp_customize->add_control(
+		'pb_network_bluesky', [
+			'label' => __( 'Bluesky', 'pressbooks-aldine' ),
+			'section'  => 'pb_network_social',
+			'settings' => 'pb_network_bluesky',
+		]
+	);
+	$wp_customize->add_setting(
 		'pb_network_facebook', [
 			'type' => 'option',
 			'sanitize_callback' => 'esc_url_raw',
@@ -151,7 +239,7 @@ function customize_register( \WP_Customize_Manager $wp_customize ) {
 	);
 	$wp_customize->add_control(
 		'pb_network_twitter', [
-			'label' => __( 'Twitter', 'pressbooks-aldine' ),
+			'label' => __( 'X', 'pressbooks-aldine' ),
 			'section'  => 'pb_network_social',
 			'settings' => 'pb_network_twitter',
 		]
@@ -207,10 +295,6 @@ function customize_register( \WP_Customize_Manager $wp_customize ) {
 			]
 		);
 
-		$options = get_catalog_options();
-		$books = collect( $options['books'] )->pluck( 'title', 'id' )->toArray();
-		$books = [ '' => __( 'Select a book', 'pressbooks-aldine' ) ] + $books;
-
 		foreach ( range( 1, MAX_FEATURED_BOOKS ) as $i ) {
 			$wp_customize->add_setting(
 				"pb_front_page_catalog_book_{$i}", [
@@ -218,13 +302,15 @@ function customize_register( \WP_Customize_Manager $wp_customize ) {
 				]
 			);
 			$wp_customize->add_control(
-				"pb_front_page_catalog_book_{$i}", [
-					'label' => __( 'Featured book', 'pressbooks-aldine' ) . " {$i}",
-					'section'  => 'pb_front_page_catalog',
-					'settings' => "pb_front_page_catalog_book_{$i}",
-					'type' => 'select',
-					'choices' => $books,
-				]
+				new SearchFeaturedBooks(
+					$wp_customize,
+					"pb_front_page_catalog_book_{$i}",
+					[
+						'label'    => __( 'Featured Book', 'pressbooks-aldine' ) . " {$i}",
+						'section'  => 'pb_front_page_catalog',
+						'settings' => "pb_front_page_catalog_book_{$i}",
+					]
+				)
 			);
 		}
 
@@ -348,10 +434,11 @@ function enqueue_color_contrast_validator() {
 
 	$exports = [
 		'validate_color_contrast' => [
+			'pb_network_color_header_bg' => [ 'pb_network_color_primary', 'pb_network_color_primary_dark' ],
 			'pb_network_color_primary_fg' => [ 'pb_network_color_primary', 'pb_network_color_primary_dark' ],
 			'pb_network_color_accent_fg' => [ 'pb_network_color_accent', 'pb_network_color_accent_dark' ],
-			'pb_network_color_primary' => [ 'pb_network_color_primary_fg' ],
-			'pb_network_color_primary_dark' => [ 'pb_network_color_primary_fg' ],
+			'pb_network_color_primary' => [ 'pb_network_color_primary_fg', 'pb_network_color_header_bg' ],
+			'pb_network_color_primary_dark' => [ 'pb_network_color_primary_fg', 'pb_network_color_header_bg' ],
 			'pb_network_color_accent' => [ 'pb_network_color_accent_fg' ],
 			'pb_network_color_accent_dark' => [ 'pb_network_color_accent_fg' ],
 		],
@@ -379,4 +466,27 @@ function enqueue_contact_form_tweaks() {
 function enqueue_pb_a11y_in_customizer() {
 	$pb_a11y_script = plugin_dir_url( 'pressbooks' ) . 'pressbooks/assets/src/scripts/a11y.js';
 	wp_enqueue_script( 'pb-a11y', $pb_a11y_script, [ 'wp-i18n' ], false, true );
+}
+
+/**
+ * Enqueue scripts for catalog search control.
+ */
+function enqueue_catalog_search_control_assets(): void {
+	$assets = new Assets( 'pressbooks-aldine', 'theme' );
+	$assets->setSrcDirectory( 'assets' )->setDistDirectory( 'dist' );
+
+	wp_enqueue_script(
+		'aldine/customizer-search',
+		$assets->getPath( 'scripts/search-featured-books.js' ),
+		[ 'jquery' ],
+		false,
+		true
+	);
+
+	wp_localize_script( 'aldine/customizer-search', 'PB_Ajax', [
+		'ajax_url' => admin_url( 'admin-ajax.php' ),
+	] );
+
+	wp_register_style( 'search-featured-books', $assets->getPath( 'styles/search-featured-books.css' ) );
+	wp_enqueue_style( 'search-featured-books' );
 }
